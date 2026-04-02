@@ -44,6 +44,8 @@ async def on_ready():
     
     await load_cogs()
     
+
+    
     # سينك الأوامر السلاكية
     try:
         synced = await bot.tree.sync()
@@ -63,3 +65,5 @@ async def on_ready():
 
 if __name__ == "__main__":
     bot.run(config.TOKEN)
+
+    
