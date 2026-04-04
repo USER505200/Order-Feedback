@@ -7,6 +7,12 @@ import os
 from datetime import datetime
 
 # ==========================================
+# روابط الصور
+# ==========================================
+TOP_IMAGE_URL = "https://cdn.discordapp.com/attachments/1489497861350494339/1489723944582910002/word_1.gif?ex=69d1750a&is=69d0238a&hm=e9861e30bd5918e66c2d324e9bf21104bd21d8c18de12fb6cfa00681ce6f51e1&"
+BOTTOM_IMAGE_URL = "https://cdn.discordapp.com/attachments/1489497861350494339/1489730355316392088/Untitled-1.gif?ex=69d17b02&is=69d02982&hm=91bba9f3cb622da72a3555f8a9ed89383f533898b0172e271605523595e1ce54&"
+
+# ==========================================
 # HELPER FUNCTIONS
 # ==========================================
 def get_workers_in_channel(channel: discord.TextChannel):
@@ -23,9 +29,9 @@ def get_workers_in_channel(channel: discord.TextChannel):
 # ==========================================
 # MODAL FOR FEEDBACK SUBMISSION
 # ==========================================
-class FeedbackModal(discord.ui.Modal, title="Submit Feedback"):
+class FeedbackModal(discord.ui.Modal, title="⭐ Submit Your Review"):
     description = discord.ui.TextInput(
-        label="Review",
+        label="Your Review",
         placeholder="Write your review here...",
         style=discord.TextStyle.paragraph,
         required=True,
@@ -33,7 +39,7 @@ class FeedbackModal(discord.ui.Modal, title="Submit Feedback"):
     )
     customer_name = discord.ui.TextInput(
         label="Your Name (Optional)",
-        placeholder="Leave empty to keep hidden",
+        placeholder="Leave empty to stay anonymous",
         required=False,
         max_length=100
     )
@@ -52,25 +58,40 @@ class FeedbackModal(discord.ui.Modal, title="Submit Feedback"):
             )
             return
         
+        # Embed للتقييم مع الصورة العلوية (thumbnail) والصورة السفلية (image)
         embed = discord.Embed(
-            title="⭐ Feedback Received ⭐",
+            title="⭐ New Feedback Received ⭐",
+            description=f"**Review from {'**' + self.customer_name.value + '**' if self.customer_name.value and self.customer_name.value.strip() else 'an anonymous customer'}**",
             color=discord.Color.from_rgb(184, 92, 26)
         )
         
-        embed.set_thumbnail(url="https://media.discordapp.net/attachments/1487311776256098414/1489130417838882916/HHHHHHHHHHHHHHHHHHHHHH.gif")
+        # الصورة العلوية على اليمين
+        embed.set_thumbnail(url=TOP_IMAGE_URL)
         
+        # محتوى التقييم
         review_text = f"```{self.description.value}```"
         embed.add_field(name="📝 Review", value=review_text, inline=False)
         
-        if self.customer_name.value and self.customer_name.value.strip():
-            customer_value = f"**{self.customer_name.value}**\n\n⭐⭐⭐⭐⭐"
-        else:
-            customer_value = f"*hidden*\n\n⭐⭐⭐⭐⭐"
+        # التقييم بالنجوم
+        stars = "⭐⭐⭐⭐⭐"
+        embed.add_field(name="⭐ Rating", value=stars, inline=False)
         
+        # اسم العميل
+        if self.customer_name.value and self.customer_name.value.strip():
+            customer_value = f"**{self.customer_name.value}**"
+        else:
+            customer_value = "*Anonymous*"
         embed.add_field(name="👤 Customer", value=customer_value, inline=True)
+        
+        # اسم الموظف (أول عامل في الشانل)
+        worker_mention = workers_in_channel[0].mention if workers_in_channel else "Unknown"
+        embed.add_field(name="👨‍💼 Worker", value=worker_mention, inline=True)
         
         current_time = datetime.now().strftime("%B %d, %Y at %I:%M %p")
         embed.set_footer(text=f"Submitted • {current_time}")
+        
+        # الصورة السفلية
+        embed.set_image(url=BOTTOM_IMAGE_URL)
         
         if config.FEEDBACK_CHANNEL_ID:
             feedback_channel = interaction.guild.get_channel(config.FEEDBACK_CHANNEL_ID)
@@ -82,7 +103,7 @@ class FeedbackModal(discord.ui.Modal, title="Submit Feedback"):
                     description="**Thank you for your feedback!**\nYour review has been recorded and appreciated.",
                     color=discord.Color.green()
                 )
-                confirm_embed.set_thumbnail(url="https://media.discordapp.net/attachments/1487311776256098414/1489130417838882916/HHHHHHHHHHHHHHHHHHHHHH.gif")
+                confirm_embed.set_thumbnail(url=TOP_IMAGE_URL)
                 confirm_embed.set_footer(text="Grindora Services ⭐")
                 
                 await interaction.response.send_message(embed=confirm_embed, ephemeral=True)
@@ -123,20 +144,20 @@ class FeedbackCog(commands.Cog):
         self.bot = bot
 
     # ========== SLASH COMMAND ==========
-    @app_commands.command(name="feedback", description="Start a review submission")
+    @app_commands.command(name="feedback", description="Submit a review for your completed order")
     async def slash_feedback(self, interaction: discord.Interaction):
-        full_description = """**Your order has been successfully delivered!** :white_check_mark:
+        full_description = """**✨ Your order has been successfully delivered!** ✨
 
-🔒 **Account Safety Reminder:**
-• Change your account password immediately
-• Log out of all active Jagex Launcher sessions
+> 🔒 **Account Safety Reminder:**
+> • Change your account password immediately
+> • Log out of all active Jagex Launcher sessions
+> 
+> *For full protection, we highly recommend completing these steps now.*
 
-For full protection, we highly recommend completing these steps now.
-
----
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 💬 **Need more support or want another service?**
-We're always here to help you maximize your account's potential.
+*We're always here to help you maximize your account's potential.*
 
 🛒 **Explore all services:** <#1487243724865011822>
 🎫 **Start a new order:** <#1487244035516006551>"""
@@ -147,7 +168,14 @@ We're always here to help you maximize your account's potential.
             color=discord.Color.from_rgb(184, 92, 26)
         )
         
-        embed.set_thumbnail(url="https://media.discordapp.net/attachments/1487311776256098414/1489130417838882916/HHHHHHHHHHHHHHHHHHHHHH.gif")
+        # الصورة العلوية على اليمين
+        embed.set_thumbnail(url=TOP_IMAGE_URL)
+        
+        # الصورة السفلية
+        embed.set_image(url=BOTTOM_IMAGE_URL)
+        
+        # إضافة تذييل
+        embed.set_footer(text="Grindora — Premier OSRS Services • Thank you for choosing us!")
         
         view = MainFeedbackView(interaction.channel)
         await interaction.response.send_message(embed=embed, view=view, ephemeral=False)
@@ -155,18 +183,18 @@ We're always here to help you maximize your account's potential.
     # ========== PREFIX COMMANDS ==========
     @commands.command(name="feedback", aliases=["f"])
     async def prefix_feedback(self, ctx):
-        full_description = """**Your order has been successfully delivered!** :white_check_mark:
+        full_description = """**✨ Your order has been successfully delivered!** ✨
 
-🔒 **Account Safety Reminder:**
-• Change your account password immediately
-• Log out of all active Jagex Launcher sessions
+> 🔒 **Account Safety Reminder:**
+> • Change your account password immediately
+> • Log out of all active Jagex Launcher sessions
+> 
+> *For full protection, we highly recommend completing these steps now.*
 
-For full protection, we highly recommend completing these steps now.
-
----
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 💬 **Need more support or want another service?**
-We're always here to help you maximize your account's potential.
+*We're always here to help you maximize your account's potential.*
 
 🛒 **Explore all services:** <#1487243724865011822>
 🎫 **Start a new order:** <#1487244035516006551>"""
@@ -177,7 +205,14 @@ We're always here to help you maximize your account's potential.
             color=discord.Color.from_rgb(184, 92, 26)
         )
         
-        embed.set_thumbnail(url="https://media.discordapp.net/attachments/1487311776256098414/1489130417838882916/HHHHHHHHHHHHHHHHHHHHHH.gif")
+        # الصورة العلوية على اليمين
+        embed.set_thumbnail(url=TOP_IMAGE_URL)
+        
+        # الصورة السفلية
+        embed.set_image(url=BOTTOM_IMAGE_URL)
+        
+        # إضافة تذييل
+        embed.set_footer(text="Grindora — Premier OSRS Services • Thank you for choosing us!")
         
         view = MainFeedbackView(ctx.channel)
         await ctx.send(embed=embed, view=view)
@@ -189,6 +224,8 @@ We're always here to help you maximize your account's potential.
             description="Here are all available commands for the review system.",
             color=discord.Color.blue()
         )
+        
+        embed.set_thumbnail(url=TOP_IMAGE_URL)
         
         embed.add_field(
             name="📝 **Review Commands**",
@@ -238,6 +275,7 @@ We're always here to help you maximize your account's potential.
         )
         
         embed.set_footer(text="Use !reviewsettings for detailed settings")
+        embed.set_image(url=BOTTOM_IMAGE_URL)
         await ctx.send(embed=embed)
 
     @commands.command(name="roleworker")
@@ -259,6 +297,7 @@ We're always here to help you maximize your account's potential.
                     description=f"Worker role has been set to: {role.mention} (ID: `{role_id_int}`)",
                     color=discord.Color.green()
                 )
+                embed.set_thumbnail(url=TOP_IMAGE_URL)
                 await ctx.send(embed=embed)
             else:
                 await ctx.send(f"❌ Role with ID `{role_id}` not found.")
@@ -281,6 +320,7 @@ We're always here to help you maximize your account's potential.
                 description=f"Review channel has been set to: {channel.mention} (ID: `{channel.id}`)",
                 color=discord.Color.green()
             )
+            embed.set_thumbnail(url=TOP_IMAGE_URL)
             await ctx.send(embed=embed)
             return
         
@@ -297,6 +337,7 @@ We're always here to help you maximize your account's potential.
                     description=f"Review channel has been set to: {channel.mention} (ID: `{channel_id_int}`)",
                     color=discord.Color.green()
                 )
+                embed.set_thumbnail(url=TOP_IMAGE_URL)
                 await ctx.send(embed=embed)
             else:
                 await ctx.send(f"❌ Channel with ID `{channel_id}` not found or is not a text channel.")
@@ -309,6 +350,8 @@ We're always here to help you maximize your account's potential.
             title="⚙️ Review System Settings",
             color=discord.Color.blue()
         )
+        
+        embed.set_thumbnail(url=TOP_IMAGE_URL)
         
         if config.WORKER_ROLE_ID:
             role = ctx.guild.get_role(config.WORKER_ROLE_ID)
@@ -329,6 +372,7 @@ We're always here to help you maximize your account's potential.
             embed.add_field(name="📢 Review Channel", value="❌ Not set", inline=False)
         
         embed.set_footer(text="Use !roleworker <id> and !setreviewchannel <id> to set these")
+        embed.set_image(url=BOTTOM_IMAGE_URL)
         await ctx.send(embed=embed)
 
     @commands.command(name="say")
@@ -350,18 +394,18 @@ We're always here to help you maximize your account's potential.
         else:
             target_channel = ctx.channel
         
-        full_description = """**Your order has been successfully delivered!** :white_check_mark:
+        full_description = """**✨ Your order has been successfully delivered!** ✨
 
-🔒 **Account Safety Reminder:**
-• Change your account password immediately
-• Log out of all active Jagex Launcher sessions
+> 🔒 **Account Safety Reminder:**
+> • Change your account password immediately
+> • Log out of all active Jagex Launcher sessions
+> 
+> *For full protection, we highly recommend completing these steps now.*
 
-For full protection, we highly recommend completing these steps now.
-
----
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 💬 **Need more support or want another service?**
-We're always here to help you maximize your account's potential.
+*We're always here to help you maximize your account's potential.*
 
 🛒 **Explore all services:** <#1487243724865011822>
 🎫 **Start a new order:** <#1487244035516006551>"""
@@ -372,7 +416,14 @@ We're always here to help you maximize your account's potential.
             color=discord.Color.from_rgb(184, 92, 26)
         )
         
-        embed.set_thumbnail(url="https://media.discordapp.net/attachments/1487311776256098414/1489130417838882916/HHHHHHHHHHHHHHHHHHHHHH.gif")
+        # الصورة العلوية على اليمين
+        embed.set_thumbnail(url=TOP_IMAGE_URL)
+        
+        # الصورة السفلية
+        embed.set_image(url=BOTTOM_IMAGE_URL)
+        
+        # إضافة تذييل
+        embed.set_footer(text="Grindora — Premier OSRS Services • Thank you for choosing us!")
         
         view = MainFeedbackView(target_channel)
         await target_channel.send(embed=embed, view=view)
