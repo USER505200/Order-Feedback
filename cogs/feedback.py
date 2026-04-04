@@ -12,8 +12,8 @@ from datetime import datetime
 TOP_IMAGE_URL = "https://cdn.discordapp.com/attachments/1489497861350494339/1489723944582910002/word_1.gif?ex=69d1750a&is=69d0238a&hm=e9861e30bd5918e66c2d324e9bf21104bd21d8c18de12fb6cfa00681ce6f51e1&"
 BOTTOM_IMAGE_URL = "https://cdn.discordapp.com/attachments/1489497861350494339/1489730355316392088/Untitled-1.gif?ex=69d17b02&is=69d02982&hm=91bba9f3cb622da72a3555f8a9ed89383f533898b0172e271605523595e1ce54&"
 
-# الإيموجي الجديد بدلاً من الجوهرة
-ORDER_COMPLETED_EMOJI = "<a:emoji_1077324628525056091:1077324628525056091>"
+# الإيموجي الجديد (تم التحديث)
+ORDER_COMPLETED_EMOJI = "<a:emoji_1489787675991998604:1489787675991998604>"
 
 # ==========================================
 # HELPER FUNCTIONS
@@ -134,7 +134,7 @@ class MainFeedbackView(discord.ui.View):
         sythe_button = discord.ui.Button(
             label="Sythe Vouches",
             style=discord.ButtonStyle.link,
-            url="https://www.sythe.org/threads/prime07-official-vouches/",
+            url="https://www.sythe.org/threads/grindora-vouches-osrs-services-trusted-fast/",
             emoji="📜"
         )
         self.add_item(sythe_button)
@@ -162,7 +162,7 @@ class FeedbackCog(commands.Cog):
 💬 **Need more support or want another service?**
 *We're always here to help you maximize your account's potential.*
 
-🛒 **Explore all services:** <#1487243724865011822>
+🛒 **Explore all services:** <#1488969938210128134>
 🎫 **Start a new order:** <#1487244035516006551>"""
         
         embed = discord.Embed(
@@ -199,7 +199,7 @@ class FeedbackCog(commands.Cog):
 💬 **Need more support or want another service?**
 *We're always here to help you maximize your account's potential.*
 
-🛒 **Explore all services:** <#1487243724865011822>
+🛒 **Explore all services:** <#1488969938210128134>
 🎫 **Start a new order:** <#1487244035516006551>"""
         
         embed = discord.Embed(
@@ -409,7 +409,7 @@ class FeedbackCog(commands.Cog):
 💬 **Need more support or want another service?**
 *We're always here to help you maximize your account's potential.*
 
-🛒 **Explore all services:** <#1487243724865011822>
+🛒 **Explore all services:** <#1488969938210128134>
 🎫 **Start a new order:** <#1488969938210128134>"""
         
         embed = discord.Embed(
