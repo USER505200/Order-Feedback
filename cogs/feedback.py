@@ -200,7 +200,7 @@ class FeedbackCog(commands.Cog):
 🎫 **Start a new order:** <#1487244035516006551>"""
         
         embed = discord.Embed(
-            title="💎 Order Completed — Grindora Services ",
+            title="💎 Order Completed💎",
             description=full_description,
             color=discord.Color.from_rgb(184, 92, 26)
         )
