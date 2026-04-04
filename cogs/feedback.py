@@ -186,7 +186,7 @@ class FeedbackCog(commands.Cog):
     # ========== PREFIX COMMANDS ==========
     @commands.command(name="feedback", aliases=["f"])
     async def prefix_feedback(self, ctx):
-        full_description = """**✨ Your order has been successfully delivered!** ✨
+        full_description = """**✨ Your order has been successfully delivered!** 
 
 > 🔒 **Account Safety Reminder:**
 > • Change your account password immediately
@@ -397,7 +397,7 @@ class FeedbackCog(commands.Cog):
         else:
             target_channel = ctx.channel
         
-        full_description = """**✨ Your order has been successfully delivered!** ✨
+        full_description = """**✨ Your order has been successfully delivered!** 
 
 > 🔒 **Account Safety Reminder:**
 > • Change your account password immediately
