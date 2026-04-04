@@ -102,7 +102,7 @@ class FeedbackModal(discord.ui.Modal, title="⭐ Submit Your Review"):
             
             # Rating
             stars = "⭐⭐⭐⭐⭐"
-            embed.add_field(name="⭐ Rating", value=stars, inline=False)
+            embed.add_field(name=" Thank ur Review!", value=stars, inline=False)
             
             # Customer name
             if self.customer_name.value and self.customer_name.value.strip():
