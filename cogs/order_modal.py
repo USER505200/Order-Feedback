@@ -3,6 +3,10 @@ from discord import app_commands
 from discord.ext import commands
 import config
 
+# Image URLs
+TOP_IMAGE_URL = "https://cdn.discordapp.com/attachments/1489497861350494339/1489723944582910002/word_1.gif?ex=69d1750a&is=69d0238a&hm=e9861e30bd5918e66c2d324e9bf21104bd21d8c18de12fb6cfa00681ce6f51e1&"
+BOTTOM_IMAGE_URL = "https://cdn.discordapp.com/attachments/1489497861350494339/1489730355316392088/Untitled-1.gif?ex=69d17b02&is=69d02982&hm=91bba9f3cb622da72a3555f8a9ed89383f533898b0172e271605523595e1ce54&"
+
 class OrderModal(discord.ui.Modal, title='Complete Order'):
     def __init__(self):
         super().__init__()
@@ -42,20 +46,39 @@ class OrderModal(discord.ui.Modal, title='Complete Order'):
             color=discord.Color.orange()
         )
         
-        embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/1487311776256098414/1488828517386027078/word_1.gif")
+        # Top right image (thumbnail)
+        embed.set_thumbnail(url=TOP_IMAGE_URL)
+        
+        # Add information field
         embed.add_field(name="📌 Information", value=fixed_text, inline=False)
+        
+        # Add security notice
+        embed.add_field(
+            name="⚠️ Security Notice",
+            value="• Change your account password immediately\n• Log out of all active sessions\n• Keep this ticket for support",
+            inline=False
+        )
+        
+        # Bottom image (main image from user input)
         embed.set_image(url=self.image_link.value)
+        
+        # Footer with completion info
         embed.set_footer(
-            text=f"Completed by: {interaction.user.display_name}",
+            text=f"Completed by: {interaction.user.display_name} • Order completed successfully",
             icon_url=interaction.user.display_avatar.url
         )
         
         await channel.send(embed=embed)
         
-        await interaction.response.send_message(
-            f"✅ Order completed and sent to <#{config.ORDER_CHANNEL_ID}>!",
-            ephemeral=True
+        # Send confirmation to user
+        confirm_embed = discord.Embed(
+            title="✅ Order Completed Successfully!",
+            description=f"Your order has been completed and sent to <#{config.ORDER_CHANNEL_ID}>.\nThank you for choosing Grindora!",
+            color=discord.Color.green()
         )
+        confirm_embed.set_thumbnail(url=TOP_IMAGE_URL)
+        
+        await interaction.response.send_message(embed=confirm_embed, ephemeral=True)
 
 class OrderCog(commands.Cog):
     def __init__(self, bot):
