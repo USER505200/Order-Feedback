@@ -111,15 +111,7 @@ class FeedbackModal(discord.ui.Modal, title="⭐ Submit Your Review"):
                 customer_value = "*Anonymous*"
             embed.add_field(name="👤 Customer", value=customer_value, inline=True)
             
-            # Worker name (first worker in channel)
-            if workers_in_channel:
-                worker_mention = workers_in_channel[0].mention
-                embed.add_field(name="👨‍💼 Worker", value=worker_mention, inline=True)
-            else:
-                embed.add_field(name="👨‍💼 Worker", value="*No worker assigned*", inline=True)
             
-            # Ticket/channel info
-            embed.add_field(name="🎫 Ticket", value=f"{self.channel.mention}", inline=True)
             
             current_time = datetime.now().strftime("%B %d, %Y at %I:%M %p")
             embed.set_footer(text=f"Submitted • {current_time}")
