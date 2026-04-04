@@ -7,10 +7,13 @@ import os
 from datetime import datetime
 
 # ==========================================
-# روابط الصور
+# روابط الصور والإيموجيات
 # ==========================================
 TOP_IMAGE_URL = "https://cdn.discordapp.com/attachments/1489497861350494339/1489723944582910002/word_1.gif?ex=69d1750a&is=69d0238a&hm=e9861e30bd5918e66c2d324e9bf21104bd21d8c18de12fb6cfa00681ce6f51e1&"
 BOTTOM_IMAGE_URL = "https://cdn.discordapp.com/attachments/1489497861350494339/1489730355316392088/Untitled-1.gif?ex=69d17b02&is=69d02982&hm=91bba9f3cb622da72a3555f8a9ed89383f533898b0172e271605523595e1ce54&"
+
+# الإيموجي الجديد بدلاً من الجوهرة
+ORDER_COMPLETED_EMOJI = "<a:emoji_1077324628525056091:1077324628525056091>"
 
 # ==========================================
 # HELPER FUNCTIONS
@@ -146,7 +149,7 @@ class FeedbackCog(commands.Cog):
     # ========== SLASH COMMAND ==========
     @app_commands.command(name="feedback", description="Submit a review for your completed order")
     async def slash_feedback(self, interaction: discord.Interaction):
-        full_description = """**✨ Your order has been successfully delivered!** ✨
+        full_description = """**✨ Your order has been successfully delivered!**
 
 > 🔒 **Account Safety Reminder:**
 > • Change your account password immediately
@@ -163,7 +166,7 @@ class FeedbackCog(commands.Cog):
 🎫 **Start a new order:** <#1487244035516006551>"""
         
         embed = discord.Embed(
-            title="💎 Order Completed — Grindora Services 💎",
+            title=f"{ORDER_COMPLETED_EMOJI} Order Completed — Grindora Services {ORDER_COMPLETED_EMOJI}",
             description=full_description,
             color=discord.Color.from_rgb(184, 92, 26)
         )
@@ -200,7 +203,7 @@ class FeedbackCog(commands.Cog):
 🎫 **Start a new order:** <#1487244035516006551>"""
         
         embed = discord.Embed(
-            title="💎 Order Completed💎",
+            title=f"{ORDER_COMPLETED_EMOJI} Order Completed {ORDER_COMPLETED_EMOJI}",
             description=full_description,
             color=discord.Color.from_rgb(184, 92, 26)
         )
@@ -401,17 +404,16 @@ class FeedbackCog(commands.Cog):
 > • Log out of all active Jagex Launcher sessions
 > 
 > *For full protection, we highly recommend completing these steps now.*
-
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 💬 **Need more support or want another service?**
 *We're always here to help you maximize your account's potential.*
 
 🛒 **Explore all services:** <#1487243724865011822>
-🎫 **Start a new order:** <#1487244035516006551>"""
+🎫 **Start a new order:** <#1488969938210128134>"""
         
         embed = discord.Embed(
-            title="💎 Order Completed — Grindora Services 💎",
+            title=f"{ORDER_COMPLETED_EMOJI} Order Completed — Grindora Services {ORDER_COMPLETED_EMOJI}",
             description=full_description,
             color=discord.Color.from_rgb(184, 92, 26)
         )
