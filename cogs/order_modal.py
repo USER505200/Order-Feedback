@@ -35,7 +35,7 @@ class OrderModal(discord.ui.Modal, title='Complete Order'):
 
         comment_in_frame = f"```css\n{self.comment.value}\n```"
         
-        fixed_text = """🛒 Explore all services: <#1487243724865011822>
+        fixed_text = """🛒 Explore all services: <#1488969938210128134>
 🎫 Start a new order: <#1487244035516006551>"""
         
         emoji = "<a:12964893757058582011:1488901115750650017>"
@@ -52,12 +52,7 @@ class OrderModal(discord.ui.Modal, title='Complete Order'):
         # Add information field
         embed.add_field(name="📌 Information", value=fixed_text, inline=False)
         
-        # Add security notice
-        embed.add_field(
-            name="⚠️ Security Notice",
-            value="• Change your account password immediately\n• Log out of all active sessions\n• Keep this ticket for support",
-            inline=False
-        )
+
         
         # Bottom image (main image from user input)
         embed.set_image(url=self.image_link.value)
