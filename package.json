@@ -1,15 +1,5 @@
-{
-  "name": "complete-feedback-bot",
-  "version": "1.0.0",
-  "description": "Discord bot for completed order embeds and customer feedback",
-  "main": "src/index.js",
-  "type": "commonjs",
-  "scripts": {
-    "start": "node src/index.js",
-    "deploy": "node src/deploy-commands.js"
-  },
-  "dependencies": {
-    "discord.js": "^14.15.3",
-    "dotenv": "^16.4.5"
-  }
+"scripts": {
+  "start": "node src/index.js",
+  "deploy": "node src/deploy-commands.js",
+  "build": "npm run deploy"
 }
