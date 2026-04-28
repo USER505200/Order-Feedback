@@ -155,6 +155,61 @@ async function handleDeleteComplete(message) {
   await message.delete().catch(() => {});
 }
 
+async function handleTextCompleteOrder(message, args) {
+  // التحقق من الصلاحيات
+  if (!memberHasRole(message.member, COMPLETE_ALLOWED_ROLE_NAMES)) {
+    return message.reply('❌ You do not have permission to use this command.');
+  }
+
+  // الحصول على الوصف والصورة
+  const description = args.join(' ');
+  const image = message.attachments.first();
+
+  if (!description || !image) {
+    return message.reply('Usage: `!completeorder Your description here`\nwith an image attached');
+  }
+
+  // الحصول على الروم المستهدف
+  const targetChannelId = COMPLETED_ORDERS_CHANNEL_ID;
+  if (!targetChannelId) {
+    return message.reply('❌ COMPLETED_ORDERS_CHANNEL_ID is not set in environment variables.');
+  }
+
+  const targetChannel = await message.guild.channels.fetch(targetChannelId).catch(() => null);
+  if (!targetChannel || !targetChannel.isTextBased()) {
+    return message.reply('❌ Completed orders channel not found or invalid.');
+  }
+
+  // إنشاء الـ Embed
+  const guildIcon = message.guild.iconURL({ size: 256 }) || null;
+  const infoImageUrl = process.env.COMPLETE_ORDER_INFO_IMAGE_URL || guildIcon || null;
+
+  const channel1Id = process.env.COMPLETE_ORDER_CHANNEL_1_ID || '';
+  const channel1Label = process.env.COMPLETE_ORDER_CHANNEL_1_LABEL || '🛒 Explore all services:';
+  const channel2Id = process.env.COMPLETE_ORDER_CHANNEL_2_ID || '';
+  const channel2Label = process.env.COMPLETE_ORDER_CHANNEL_2_LABEL || '🎫 Start a new order:';
+
+  const linkLines = [];
+  if (channel1Id) linkLines.push(`${channel1Label} <#${channel1Id}>`);
+  if (channel2Id) linkLines.push(`${channel2Label} <#${channel2Id}>`);
+
+  const embed = new EmbedBuilder()
+    .setColor(0xff6a00)
+    .setAuthor({ name: 'Complete Order', iconURL: guildIcon || undefined })
+    .setDescription(`## ✅ Completed Order ✅\n\`\`\`\n${description}\n\`\`\``)
+    .setThumbnail(infoImageUrl || undefined)
+    .setImage(image.url)
+    .addFields(
+      ...(linkLines.length ? [{ name: 'Links', value: linkLines.join('\n'), inline: false }] : []),
+      { name: 'Completed by', value: `<@${message.author.id}>`, inline: false }
+    )
+    .setFooter({ text: `Completed by: ${message.author.id}`, iconURL: guildIcon || undefined })
+    .setTimestamp();
+
+  await targetChannel.send({ embeds: [embed] });
+  return message.reply(`✅ Complete order sent successfully to <#${targetChannelId}>.`);
+}
+
 client.once(Events.ClientReady, (readyClient) => {
   console.log(`Logged in as ${readyClient.user.tag}`);
 });
@@ -169,8 +224,9 @@ client.on(Events.MessageCreate, async (message) => {
     const parts = raw.split(/\s+/);
     const command = (parts.shift() || '').toLowerCase();
 
-    if (command === 'f') return await handleFeedback(message, parts);
+    if (command === 'f') return await handleFeedback(message);
     if (command === 'd') return await handleDeleteComplete(message);
+    if (command === 'completeorder' || command === 'co') return await handleTextCompleteOrder(message, parts);
   } catch (error) {
     console.error('Message command error:', error);
   }
