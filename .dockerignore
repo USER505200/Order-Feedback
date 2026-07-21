@@ -1,6 +1,5 @@
 node_modules
 .npm-cache
-.playwright-browsers
 npm-debug.log
 .env
 .git

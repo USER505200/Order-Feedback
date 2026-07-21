@@ -1,6 +1,5 @@
 node_modules/
 .npm-cache/
-.playwright-browsers/
 coverage/
 .env
 npm-debug.log

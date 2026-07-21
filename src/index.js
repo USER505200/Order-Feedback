@@ -13,9 +13,7 @@ const {
 } = require('discord.js');
 
 const completeOrder = require('./commands/completeOrder');
-const sytheSyncNow = require('./commands/sytheSyncNow');
 const { registerCommands } = require('./registerCommands');
-const { runSytheVouchSync, startSytheVouchSync } = require('./sytheVouchSync');
 const {
   FEEDBACK_BUTTON_ID,
   buildFeedbackFooterText,
@@ -41,7 +39,6 @@ const SERVICES_CHANNEL_LABEL = process.env.SERVICES_CHANNEL_LABEL || 'Explore al
 const CREATE_ORDER_CHANNEL_ID = process.env.CREATE_ORDER_CHANNEL_ID || '';
 const CREATE_ORDER_CHANNEL_LABEL = process.env.CREATE_ORDER_CHANNEL_LABEL || 'Start a new order:';
 const ORDER_COMPLETE_TOP_IMAGE_URL = process.env.ORDER_COMPLETE_TOP_IMAGE_URL || '';
-const FEEDBACK_VOUCHES_URL = process.env.FEEDBACK_VOUCHES_URL || '';
 
 function parseRoleNames(value, fallback) {
   return String(value || fallback)
@@ -73,7 +70,7 @@ function memberHasRole(member, allowedRoles) {
 }
 
 function buildFeedbackButtons() {
-  const rows = [
+  return [
     new ActionRowBuilder().addComponents(
       new ButtonBuilder()
         .setCustomId(FEEDBACK_BUTTON_ID)
@@ -81,19 +78,6 @@ function buildFeedbackButtons() {
         .setStyle(ButtonStyle.Primary),
     ),
   ];
-
-  if (FEEDBACK_VOUCHES_URL) {
-    rows.push(
-      new ActionRowBuilder().addComponents(
-        new ButtonBuilder()
-          .setLabel('📝 Sythe Vouch')
-          .setStyle(ButtonStyle.Link)
-          .setURL(FEEDBACK_VOUCHES_URL),
-      ),
-    );
-  }
-
-  return rows;
 }
 
 async function handleFeedback(message) {
@@ -164,7 +148,9 @@ async function handleDeleteComplete(message) {
   if (!COMPLETED_ORDERS_CHANNEL_ID || message.channelId !== COMPLETED_ORDERS_CHANNEL_ID) return;
   if (!message.reference?.messageId) return;
 
-  const targetMessage = await message.channel.messages.fetch(message.reference.messageId).catch(() => null);
+  const targetMessage = await message.channel.messages
+    .fetch(message.reference.messageId)
+    .catch(() => null);
   if (!targetMessage) return;
   if (targetMessage.author.id !== client.user.id) return;
 
@@ -185,7 +171,6 @@ async function handleDeleteComplete(message) {
 
 client.once(Events.ClientReady, (readyClient) => {
   console.log(`Logged in as ${readyClient.user.tag}`);
-  void startSytheVouchSync(client);
 });
 
 client.on(Events.MessageCreate, async (message) => {
@@ -210,11 +195,6 @@ client.on(Events.InteractionCreate, async (interaction) => {
     if (interaction.isChatInputCommand()) {
       if (interaction.commandName === 'complete-order') {
         return await completeOrder.execute(interaction);
-      }
-      if (interaction.commandName === 'sythe-sync-now') {
-        return await sytheSyncNow.execute(interaction, {
-          runManualSync: () => runSytheVouchSync(client, 'manual'),
-        });
       }
       return;
     }
@@ -268,16 +248,20 @@ client.on(Events.InteractionCreate, async (interaction) => {
         });
 
         if (!claimFeedbackSubmission(submissionKey)) {
-          return await interaction.reply({
-            content: 'Your review is already being processed. Please wait a moment.',
-            ephemeral: true,
-          }).catch(() => {});
+          return await interaction
+            .reply({
+              content: 'Your review is already being processed. Please wait a moment.',
+              ephemeral: true,
+            })
+            .catch(() => {});
         }
 
         await interaction.deferReply({ ephemeral: true });
 
         try {
-          const feedbackChannel = await interaction.guild.channels.fetch(FEEDBACK_CHANNEL_ID).catch(() => null);
+          const feedbackChannel = await interaction.guild.channels
+            .fetch(FEEDBACK_CHANNEL_ID)
+            .catch(() => null);
           if (!feedbackChannel || !feedbackChannel.isTextBased()) {
             releaseFeedbackSubmission(submissionKey);
             return await interaction.editReply({
@@ -285,7 +269,9 @@ client.on(Events.InteractionCreate, async (interaction) => {
             });
           }
 
-          const sourceMessage = await interaction.channel?.messages.fetch(sourceMessageId).catch(() => null);
+          const sourceMessage = await interaction.channel?.messages
+            .fetch(sourceMessageId)
+            .catch(() => null);
           const workerIds = parseFeedbackWorkerIds(sourceMessage?.embeds?.[0]?.footer?.text || '');
           if (!workerIds.length) {
             releaseFeedbackSubmission(submissionKey);
@@ -342,16 +328,20 @@ client.on(Events.InteractionCreate, async (interaction) => {
     console.error('Interaction error:', error);
 
     if (interaction.replied || interaction.deferred) {
-      return await interaction.followUp({
-        content: 'Something went wrong while running this action.',
-        ephemeral: true,
-      }).catch(() => {});
+      return await interaction
+        .followUp({
+          content: 'Something went wrong while running this action.',
+          ephemeral: true,
+        })
+        .catch(() => {});
     }
 
-    return await interaction.reply({
-      content: 'Something went wrong while running this action.',
-      ephemeral: true,
-    }).catch(() => {});
+    return await interaction
+      .reply({
+        content: 'Something went wrong while running this action.',
+        ephemeral: true,
+      })
+      .catch(() => {});
   }
 });
 

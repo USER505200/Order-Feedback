@@ -1,7 +1,6 @@
 require('dotenv').config();
 const { REST, Routes } = require('discord.js');
 const completeOrder = require('./commands/completeOrder');
-const sytheSyncNow = require('./commands/sytheSyncNow');
 
 async function registerCommands() {
   const token = process.env.DISCORD_TOKEN;
@@ -15,7 +14,7 @@ async function registerCommands() {
   const rest = new REST({ version: '10' }).setToken(token);
 
   await rest.put(Routes.applicationGuildCommands(clientId, guildId), {
-    body: [completeOrder.data.toJSON(), sytheSyncNow.data.toJSON()],
+    body: [completeOrder.data.toJSON()],
   });
 }
 

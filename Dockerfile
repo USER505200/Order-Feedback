@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/playwright:v1.61.0-noble
+FROM node:20-bookworm-slim
 
 WORKDIR /app
 
