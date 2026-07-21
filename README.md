@@ -18,7 +18,7 @@ It includes:
    - `FEEDBACK_CHANNEL_ID`
    - `SERVICES_CHANNEL_ID`
    - `CREATE_ORDER_CHANNEL_ID`
-   - image URLs if needed
+   - image URLs if needed such as `ORDER_COMPLETE_TOP_IMAGE_URL` and `FEEDBACK_BANNER_URL`
 3) Run:
 ```bash
 npm install

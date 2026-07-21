@@ -39,6 +39,7 @@ const SERVICES_CHANNEL_LABEL = process.env.SERVICES_CHANNEL_LABEL || 'Explore al
 const CREATE_ORDER_CHANNEL_ID = process.env.CREATE_ORDER_CHANNEL_ID || '';
 const CREATE_ORDER_CHANNEL_LABEL = process.env.CREATE_ORDER_CHANNEL_LABEL || 'Start a new order:';
 const ORDER_COMPLETE_TOP_IMAGE_URL = process.env.ORDER_COMPLETE_TOP_IMAGE_URL || '';
+const FEEDBACK_BANNER_URL = process.env.FEEDBACK_BANNER_URL || '';
 
 function parseRoleNames(value, fallback) {
   return String(value || fallback)
@@ -102,6 +103,7 @@ async function handleFeedback(message) {
     .setTitle('💎 Grindora Services Order Complete')
     .setDescription('Your order has been successfully delivered! ✅')
     .setThumbnail(ORDER_COMPLETE_TOP_IMAGE_URL || guildIcon || undefined)
+    .setImage(FEEDBACK_BANNER_URL || undefined)
     .addFields(
       {
         name: '🔒 Account Safety Reminder',
@@ -284,7 +286,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
           const guildIcon = interaction.guild?.iconURL({ size: 256 }) || null;
 
           const feedbackEmbed = new EmbedBuilder()
-            .setColor(0xf59e0b)
+            .setColor(0xdc2626)
             .setTitle('⭐ New Feedback Received')
             .addFields(
               {
@@ -293,7 +295,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
                 inline: false,
               },
               {
-                name: '⭐ Rating',
+                name: '💎 Rating',
                 value: '⭐⭐⭐⭐⭐',
                 inline: false,
               },
@@ -309,6 +311,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
               },
             )
             .setThumbnail(ORDER_COMPLETE_TOP_IMAGE_URL || guildIcon || undefined)
+            .setImage(FEEDBACK_BANNER_URL || undefined)
             .setTimestamp();
 
           await feedbackChannel.send({ embeds: [feedbackEmbed] });
