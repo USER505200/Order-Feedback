@@ -7,7 +7,8 @@
   "scripts": {
     "start": "node src/index.js",
     "deploy": "node src/deploy-commands.js",
-    "test": "node --test"
+    "test": "node --test",
+    "gmail:token": "node src/tools/gmailTokenHelper.js"
   },
   "dependencies": {
     "discord.js": "^14.15.3",

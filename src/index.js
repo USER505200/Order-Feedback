@@ -30,6 +30,7 @@ const {
   COMPLETE_ORDER_AUTHOR_NAME,
   parseCompleteOrderOwnerId,
 } = require('./utils/completeOrderHelpers');
+const { sendSytheVouchMessage, startSytheEmailSync } = require('./sytheEmailSync');
 
 const PREFIX = process.env.PREFIX || '!';
 const COMPLETED_ORDERS_CHANNEL_ID = process.env.COMPLETED_ORDERS_CHANNEL_ID || '';
@@ -40,6 +41,7 @@ const CREATE_ORDER_CHANNEL_ID = process.env.CREATE_ORDER_CHANNEL_ID || '';
 const CREATE_ORDER_CHANNEL_LABEL = process.env.CREATE_ORDER_CHANNEL_LABEL || 'Start a new order:';
 const ORDER_COMPLETE_TOP_IMAGE_URL = process.env.ORDER_COMPLETE_TOP_IMAGE_URL || '';
 const FEEDBACK_BANNER_URL = process.env.FEEDBACK_BANNER_URL || '';
+const SYTHE_VOUCHES_THREAD_URL = process.env.SYTHE_VOUCHES_THREAD_URL || '';
 
 function parseRoleNames(value, fallback) {
   return String(value || fallback)
@@ -79,6 +81,51 @@ function buildFeedbackButtons() {
         .setStyle(ButtonStyle.Primary),
     ),
   ];
+}
+
+function parsePipeSegments(value) {
+  return String(value || '')
+    .split('|')
+    .map((segment) => segment.trim())
+    .filter(Boolean);
+}
+
+async function handleManualSytheVouch(message, rawArgs) {
+  const allowedRoles = parseRoleNames(
+    process.env.SYTHE_SYNC_ALLOWED_ROLES,
+    'support,administration,founder,owner,admin,manager',
+  );
+
+  if (!memberHasRole(message.member, allowedRoles)) {
+    return message.reply('You do not have permission to use this command.');
+  }
+
+  const segments = parsePipeSegments(rawArgs);
+  if (segments.length < 2) {
+    return message.reply(
+      'Use: `!sythemanual username | vouch text | thread url (optional)`',
+    );
+  }
+
+  const [authorName, vouchText, threadUrl = SYTHE_VOUCHES_THREAD_URL] = segments;
+  const imageAttachment = message.attachments.find((attachment) =>
+    String(attachment.contentType || '').toLowerCase().startsWith('image/'),
+  );
+
+  await sendSytheVouchMessage({
+    client,
+    manual: true,
+    parsedMessage: {
+      authorName,
+      vouchText,
+      threadTitle: 'Manual Sythe Import',
+      threadUrl,
+      avatarUrl: imageAttachment?.url || '',
+      internalDate: Date.now(),
+    },
+  });
+
+  return message.reply('✅ Manual Sythe vouch sent successfully.');
 }
 
 async function handleFeedback(message) {
@@ -173,6 +220,7 @@ async function handleDeleteComplete(message) {
 
 client.once(Events.ClientReady, (readyClient) => {
   console.log(`Logged in as ${readyClient.user.tag}`);
+  startSytheEmailSync(readyClient);
 });
 
 client.on(Events.MessageCreate, async (message) => {
@@ -184,9 +232,13 @@ client.on(Events.MessageCreate, async (message) => {
 
     const parts = raw.split(/\s+/);
     const command = (parts.shift() || '').toLowerCase();
+    const rawArgs = raw.slice(command.length).trim();
 
     if (command === 'f') return await handleFeedback(message);
     if (command === 'd') return await handleDeleteComplete(message);
+    if (command === 'sythemanual' || command === 'sythesend') {
+      return await handleManualSytheVouch(message, rawArgs);
+    }
   } catch (error) {
     console.error('Message command error:', error);
   }
