@@ -108,17 +108,18 @@ async function handleManualSytheVouch(message, rawArgs) {
   }
 
   const [authorName, vouchText, threadUrl = SYTHE_VOUCHES_THREAD_URL] = segments;
+  const defaultThreadTitle =
+    process.env.SYTHE_VOUCHES_THREAD_TITLE || 'Grindora Vouches | OSRS Services | Trusted & Fast';
   const imageAttachment = message.attachments.find((attachment) =>
     String(attachment.contentType || '').toLowerCase().startsWith('image/'),
   );
 
   await sendSytheVouchMessage({
     client,
-    manual: true,
     parsedMessage: {
       authorName,
       vouchText,
-      threadTitle: 'Manual Sythe Import',
+      threadTitle: defaultThreadTitle,
       threadUrl,
       avatarUrl: imageAttachment?.url || '',
       internalDate: Date.now(),

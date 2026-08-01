@@ -89,7 +89,7 @@ async function fetchUnreadSytheMessages(accessToken, userEmail) {
   return result.messages || [];
 }
 
-async function sendSytheVouchMessage({ client, parsedMessage, manual = false }) {
+async function sendSytheVouchMessage({ client, parsedMessage }) {
   const channelId = process.env.SYTHE_VOUCHES_CHANNEL_ID || '';
   if (!channelId) {
     throw new Error('SYTHE_VOUCHES_CHANNEL_ID is missing.');
@@ -120,10 +120,6 @@ async function sendSytheVouchMessage({ client, parsedMessage, manual = false }) 
     bannerUrl,
     avatarUrl: parsedMessage.avatarUrl,
   });
-
-  if (manual) {
-    embed.setTitle('💎 Manual Sythe Vouch');
-  }
 
   await channel.send({ embeds: [embed] });
 }

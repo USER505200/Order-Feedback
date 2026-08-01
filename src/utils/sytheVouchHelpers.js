@@ -198,22 +198,22 @@ function buildSytheVouchEmbed({
 }) {
   const embed = new EmbedBuilder()
     .setColor(0xdc2626)
-    .setTitle('💎 New Sythe Vouch')
+    .setTitle('💎 Grindora Sythe Vouch')
     .setThumbnail(logoUrl || undefined)
     .setImage(bannerUrl || undefined)
     .addFields(
       {
-        name: '👤 User',
+        name: '👤 Vouched By',
         value: authorName || 'Unknown',
         inline: false,
       },
       {
-        name: '📝 Vouch',
+        name: '📝 Review',
         value: `\`\`\`\n${vouchText || 'No text found.'}\n\`\`\``,
         inline: false,
       },
       {
-        name: '🔗 Thread',
+        name: '🔗 View Thread',
         value: threadUrl ? `[Open Thread](${threadUrl})` : threadTitle || 'Not available',
         inline: false,
       },
