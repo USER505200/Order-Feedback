@@ -1,4 +1,10 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const {
+  SlashCommandBuilder,
+  EmbedBuilder,
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+} = require('discord.js');
 const {
   COMPLETE_ORDER_AUTHOR_NAME,
   IMAGE_OPTION_NAMES,
@@ -18,6 +24,17 @@ function parseRoleNames(value, fallback) {
 function hasAllowedRole(member, allowedRoles) {
   const memberRoles = member?.roles?.cache?.map((role) => role.name.toLowerCase()) || [];
   return allowedRoles.some((roleName) => memberRoles.includes(roleName));
+}
+
+function buildDiscordChannelUrl(guildId, channelId) {
+  const cleanGuildId = String(guildId || '').trim();
+  const cleanChannelId = String(channelId || '').trim();
+
+  if (!cleanGuildId || !cleanChannelId) {
+    return '';
+  }
+
+  return `https://discord.com/channels/${cleanGuildId}/${cleanChannelId}`;
 }
 
 const commandBuilder = new SlashCommandBuilder()
@@ -123,10 +140,18 @@ module.exports = {
       const channel1Label = process.env.COMPLETE_ORDER_CHANNEL_1_LABEL || 'Explore all services:';
       const channel2Id = process.env.COMPLETE_ORDER_CHANNEL_2_ID || '';
       const channel2Label = process.env.COMPLETE_ORDER_CHANNEL_2_LABEL || 'Start a new order:';
+      const priceListChannelId = process.env.PRICE_LIST_CHANNEL_ID || '1488969938210128134';
+      const priceListLabel = process.env.PRICE_LIST_LABEL || 'Price List';
 
       const linkLines = [];
       if (channel1Id) linkLines.push(`${channel1Label} <#${channel1Id}>`);
       if (channel2Id) linkLines.push(`${channel2Label} <#${channel2Id}>`);
+      if (priceListChannelId) linkLines.push(`${priceListLabel} <#${priceListChannelId}>`);
+
+      const sharedUrl =
+        buildDiscordChannelUrl(interaction.guildId, channel2Id) ||
+        buildDiscordChannelUrl(interaction.guildId, channel1Id) ||
+        buildDiscordChannelUrl(interaction.guildId, priceListChannelId);
 
       const infoBlock =
         '## ✅ Completed Order ✅\n' +
@@ -141,6 +166,7 @@ module.exports = {
             name: COMPLETE_ORDER_AUTHOR_NAME,
             iconURL: guildIcon || undefined,
           })
+          .setURL(sharedUrl || null)
           .setDescription(infoBlock)
           .setThumbnail(infoImageUrl || undefined)
           .setImage(`attachment://${files[0].name}`)
@@ -171,11 +197,38 @@ module.exports = {
         embeds.push(
           new EmbedBuilder()
             .setColor(0xff6a00)
+            .setURL(sharedUrl || null)
             .setImage(`attachment://${file.name}`),
         );
       }
 
-      await targetChannel.send({ embeds, files });
+      const buttons = [];
+      const priceListUrl = buildDiscordChannelUrl(interaction.guildId, priceListChannelId);
+      const createOrderUrl = buildDiscordChannelUrl(interaction.guildId, channel2Id);
+
+      if (priceListUrl) {
+        buttons.push(
+          new ButtonBuilder()
+            .setLabel(priceListLabel)
+            .setStyle(ButtonStyle.Link)
+            .setURL(priceListUrl),
+        );
+      }
+
+      if (createOrderUrl) {
+        buttons.push(
+          new ButtonBuilder()
+            .setLabel(channel2Label)
+            .setStyle(ButtonStyle.Link)
+            .setURL(createOrderUrl),
+        );
+      }
+
+      const components = buttons.length
+        ? [new ActionRowBuilder().addComponents(buttons)]
+        : [];
+
+      await targetChannel.send({ embeds, files, components });
 
       return await interaction.reply({
         content: `✅ Complete order sent successfully in <#${targetChannelId}>.`,

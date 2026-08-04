@@ -20,6 +20,7 @@ It includes:
    - `FEEDBACK_CHANNEL_ID`
    - `SERVICES_CHANNEL_ID`
    - `CREATE_ORDER_CHANNEL_ID`
+   - `PRICE_LIST_CHANNEL_ID`
    - image URLs if needed such as `ORDER_COMPLETE_TOP_IMAGE_URL` and `FEEDBACK_BANNER_URL`
 3) Run:
 ```bash
@@ -38,6 +39,7 @@ npm start
 /complete-order
 ```
 Upload up to 10 images and write the completed order description. The bot re-uploads the files in the final message so the images stay available in Discord.
+All completion images are sent as a grouped embed set, and the final message also includes `Price List` and `Create Order` link buttons.
 
 ### Feedback request
 ```text
@@ -62,6 +64,7 @@ You can attach one image to use as the vouch author image during old/manual impo
 ### Automatic Sythe Gmail sync
 - Set `SYTHE_EMAIL_SYNC_ENABLED=true`
 - Fill Gmail OAuth values and `SYTHE_VOUCHES_THREAD_URL`
+- Optional: set `SYTHE_VOUCHES_THREAD_TITLE` if you want manual imports to use the exact same thread title
 - The bot checks unread Sythe emails and posts new vouches to `SYTHE_VOUCHES_CHANNEL_ID`
 - To generate `GMAIL_REFRESH_TOKEN`, run:
 ```bash
