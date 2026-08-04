@@ -249,6 +249,15 @@ client.on(Events.InteractionCreate, async (interaction) => {
   try {
     if (interaction.isChatInputCommand()) {
       if (interaction.commandName === 'complete-order') {
+        console.log(
+          `[interaction] /complete-order received from ${interaction.user?.tag || interaction.user?.id || 'unknown'}`,
+        );
+
+        if (!interaction.deferred && !interaction.replied) {
+          await interaction.deferReply({ ephemeral: true });
+          console.log('[interaction] /complete-order acknowledged');
+        }
+
         return await completeOrder.execute(interaction);
       }
       return;

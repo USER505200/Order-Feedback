@@ -80,7 +80,9 @@ module.exports = {
         });
       }
 
-      await interaction.deferReply({ ephemeral: true });
+      if (!interaction.deferred && !interaction.replied) {
+        await interaction.deferReply({ ephemeral: true });
+      }
       console.log(`[complete-order] acknowledged in ${Date.now() - startedAt}ms`);
 
       const allowedRoles = parseRoleNames(
