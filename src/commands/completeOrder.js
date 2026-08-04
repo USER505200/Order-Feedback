@@ -86,19 +86,19 @@ module.exports = {
         });
       }
 
+      await interaction.deferReply({ ephemeral: true });
+
       const targetChannelId = process.env.COMPLETED_ORDERS_CHANNEL_ID;
       if (!targetChannelId) {
-        return await interaction.reply({
+        return await interaction.editReply({
           content: 'COMPLETED_ORDERS_CHANNEL_ID is missing in the .env file.',
-          ephemeral: true,
         });
       }
 
       const targetChannel = await interaction.guild.channels.fetch(targetChannelId).catch(() => null);
       if (!targetChannel || !targetChannel.isTextBased()) {
-        return await interaction.reply({
+        return await interaction.editReply({
           content: 'The completed orders channel is invalid or not accessible.',
-          ephemeral: true,
         });
       }
 
@@ -108,17 +108,15 @@ module.exports = {
       );
 
       if (!images.length) {
-        return await interaction.reply({
+        return await interaction.editReply({
           content: 'Please upload at least one valid image file.',
-          ephemeral: true,
         });
       }
 
       const invalidImage = images.find((image) => !isImageAttachment(image));
       if (invalidImage) {
-        return await interaction.reply({
+        return await interaction.editReply({
           content: `The file \`${invalidImage.name || 'unknown'}\` is not a supported image.`,
-          ephemeral: true,
         });
       }
 
@@ -127,9 +125,8 @@ module.exports = {
         files = await buildDurableFiles(images);
       } catch (error) {
         console.error('complete-order attachment download error:', error);
-        return await interaction.reply({
+        return await interaction.editReply({
           content: 'Could not process one or more uploaded images. Please try again.',
-          ephemeral: true,
         });
       }
 
@@ -166,7 +163,7 @@ module.exports = {
             name: COMPLETE_ORDER_AUTHOR_NAME,
             iconURL: guildIcon || undefined,
           })
-          .setURL(sharedUrl || null)
+          .setURL(sharedUrl || undefined)
           .setDescription(infoBlock)
           .setThumbnail(infoImageUrl || undefined)
           .setImage(`attachment://${files[0].name}`)
@@ -197,7 +194,7 @@ module.exports = {
         embeds.push(
           new EmbedBuilder()
             .setColor(0xff6a00)
-            .setURL(sharedUrl || null)
+            .setURL(sharedUrl || undefined)
             .setImage(`attachment://${file.name}`),
         );
       }
@@ -230,9 +227,8 @@ module.exports = {
 
       await targetChannel.send({ embeds, files, components });
 
-      return await interaction.reply({
+      return await interaction.editReply({
         content: `✅ Complete order sent successfully in <#${targetChannelId}>.`,
-        ephemeral: true,
       });
     } catch (error) {
       console.error('complete-order error:', error);
