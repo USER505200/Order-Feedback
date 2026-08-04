@@ -74,12 +74,21 @@ function buildStoredImageName(originalName, index) {
   return `complete-order-${index + 1}${extension}`;
 }
 
-async function fetchAttachmentBuffer(url, fetchImpl = globalThis.fetch) {
+async function fetchAttachmentBuffer(url, fetchImpl = globalThis.fetch, timeoutMs = 30000) {
   if (typeof fetchImpl !== 'function') {
     throw new Error('Fetch API is not available in this Node.js runtime.');
   }
 
-  const response = await fetchImpl(url);
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  let response;
+
+  try {
+    response = await fetchImpl(url, { signal: controller.signal });
+  } finally {
+    clearTimeout(timeout);
+  }
+
   if (!response.ok) {
     throw new Error(`Failed to download attachment: ${response.status} ${response.statusText}`);
   }

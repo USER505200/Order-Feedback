@@ -66,6 +66,12 @@ module.exports = {
   data: commandBuilder,
 
   async execute(interaction) {
+    const startedAt = Date.now();
+    console.log(
+      `[complete-order] received from ${interaction.user?.tag || interaction.user?.id || 'unknown'} ` +
+        `in guild ${interaction.guildId || 'DM'}`,
+    );
+
     try {
       if (!interaction.inGuild()) {
         return await interaction.reply({
@@ -74,19 +80,19 @@ module.exports = {
         });
       }
 
+      await interaction.deferReply({ ephemeral: true });
+      console.log(`[complete-order] acknowledged in ${Date.now() - startedAt}ms`);
+
       const allowedRoles = parseRoleNames(
         process.env.COMPLETE_ALLOWED_ROLES,
         'worker,support,admin,manager,founder,owner,administration',
       );
 
       if (!hasAllowedRole(interaction.member, allowedRoles)) {
-        return await interaction.reply({
+        return await interaction.editReply({
           content: 'You do not have permission to use this command.',
-          ephemeral: true,
         });
       }
-
-      await interaction.deferReply({ ephemeral: true });
 
       const targetChannelId = process.env.COMPLETED_ORDERS_CHANNEL_ID;
       if (!targetChannelId) {
@@ -122,7 +128,9 @@ module.exports = {
 
       let files;
       try {
+        console.log(`[complete-order] downloading ${images.length} attachment(s)`);
         files = await buildDurableFiles(images);
+        console.log(`[complete-order] attachments ready in ${Date.now() - startedAt}ms`);
       } catch (error) {
         console.error('complete-order attachment download error:', error);
         return await interaction.editReply({
@@ -226,6 +234,7 @@ module.exports = {
         : [];
 
       await targetChannel.send({ embeds, files, components });
+      console.log(`[complete-order] sent successfully in ${Date.now() - startedAt}ms`);
 
       return await interaction.editReply({
         content: `✅ Complete order sent successfully in <#${targetChannelId}>.`,
@@ -234,9 +243,8 @@ module.exports = {
       console.error('complete-order error:', error);
 
       if (interaction.replied || interaction.deferred) {
-        return await interaction.followUp({
+        return await interaction.editReply({
           content: 'Something went wrong while sending the completed order.',
-          ephemeral: true,
         }).catch(() => {});
       }
 
