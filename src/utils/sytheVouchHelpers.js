@@ -1,8 +1,12 @@
 const SYTHE_VOUCH_AUTHOR_PATTERNS = [
-  /,\s*([^,\n]+?)\s+replied to a thread you are watching\b/i,
-  /,\s*([^,\n]+?)\s+posted in a thread you are watching\b/i,
-  /,\s*([^,\n]+?)\s+quoted your post in the thread\b/i,
-  /,\s*([^,\n]+?)\s+posted a message in the thread you are watching\b/i,
+  /,\s*([^,\n]+?)\s+(?:has\s+)?replied to a thread you are watching\b/i,
+  /^\s*([^,\n]+?)\s+(?:has\s+)?replied to a thread you are watching\b/i,
+  /,\s*([^,\n]+?)\s+(?:has\s+)?posted in a thread you are watching\b/i,
+  /^\s*([^,\n]+?)\s+(?:has\s+)?posted in a thread you are watching\b/i,
+  /,\s*([^,\n]+?)\s+(?:has\s+)?quoted your post in the thread\b/i,
+  /^\s*([^,\n]+?)\s+(?:has\s+)?quoted your post in the thread\b/i,
+  /,\s*([^,\n]+?)\s+(?:has\s+)?posted a message in the thread you are watching\b/i,
+  /^\s*([^,\n]+?)\s+(?:has\s+)?posted a message in the thread you are watching\b/i,
 ];
 
 function decodeBase64Url(value) {

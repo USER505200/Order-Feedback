@@ -71,3 +71,44 @@ test('parseSytheEmailMessage extracts author, vouch, and thread url', () => {
   );
   assert.equal(parsed.avatarUrl, 'https://example.com/avatar.png');
 });
+
+test('parseSytheEmailMessage extracts author without recipient prefix', () => {
+  const html = `
+    <html>
+      <body>
+        <div>Apollo has replied to a thread you are watching at Sell &amp; Trade Game Items.</div>
+        <h1>Grindora Vouches | OSRS Services | Trusted &amp; Fast</h1>
+        <div>Fast and safe service.</div>
+        <a href="https://www.sythe.org/threads/grindora-vouches-osrs-services-trusted-fast/unread">View This Thread</a>
+      </body>
+    </html>
+  `;
+
+  const message = {
+    payload: {
+      headers: [
+        {
+          name: 'Subject',
+          value: 'Grindora Vouches | OSRS Services | Trusted & Fast - New reply to watched thread',
+        },
+      ],
+      parts: [
+        {
+          mimeType: 'text/html',
+          body: {
+            data: Buffer.from(html, 'utf8')
+              .toString('base64')
+              .replace(/\+/g, '-')
+              .replace(/\//g, '_')
+              .replace(/=+$/g, ''),
+          },
+        },
+      ],
+    },
+  };
+
+  const parsed = parseSytheEmailMessage(message);
+
+  assert.equal(parsed.authorName, 'Apollo');
+  assert.equal(parsed.vouchText, 'Fast and safe service.');
+});
