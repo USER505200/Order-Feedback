@@ -13,6 +13,17 @@ test('normalizeThreadUrl removes query hash and trailing slash', () => {
   );
 });
 
+test('normalizeThreadUrl removes Sythe unread and pagination suffixes', () => {
+  assert.equal(
+    normalizeThreadUrl('https://www.sythe.org/threads/grindora-vouches/unread?new=1'),
+    'https://www.sythe.org/threads/grindora-vouches',
+  );
+  assert.equal(
+    normalizeThreadUrl('https://www.sythe.org/threads/grindora-vouches/page-2#post-10'),
+    'https://www.sythe.org/threads/grindora-vouches',
+  );
+});
+
 test('parseSytheEmailMessage extracts author, vouch, and thread url', () => {
   const html = `
     <html>

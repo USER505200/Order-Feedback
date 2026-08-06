@@ -86,6 +86,9 @@ function normalizeThreadUrl(url) {
     const parsed = new URL(raw);
     parsed.hash = '';
     parsed.search = '';
+    parsed.pathname = parsed.pathname
+      .replace(/\/(?:unread|latest)\/?$/i, '')
+      .replace(/\/page-\d+\/?$/i, '');
     return parsed.toString().replace(/\/+$/, '').toLowerCase();
   } catch {
     return raw.replace(/\/+$/, '').toLowerCase();

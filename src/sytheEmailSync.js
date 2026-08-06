@@ -75,7 +75,7 @@ async function markMessageAsRead(accessToken, userEmail, messageId) {
 function buildGmailQuery() {
   return (
     process.env.SYTHE_EMAIL_SYNC_QUERY ||
-    'from:sythe@sythe.org is:unread "watched thread"'
+    'from:sythe@sythe.org is:unread'
   );
 }
 
@@ -83,7 +83,7 @@ async function fetchUnreadSytheMessages(accessToken, userEmail) {
   const query = encodeURIComponent(buildGmailQuery());
   const result = await gmailRequest(
     accessToken,
-    `users/${encodeURIComponent(userEmail)}/messages?q=${query}&maxResults=10`,
+    `users/${encodeURIComponent(userEmail)}/messages?q=${query}&maxResults=25`,
   );
 
   return result.messages || [];
@@ -130,7 +130,13 @@ function isTargetThread(threadUrl) {
     return true;
   }
 
-  return normalizeThreadUrl(threadUrl) === normalizeThreadUrl(targetThreadUrl);
+  const normalizedThreadUrl = normalizeThreadUrl(threadUrl);
+  const normalizedTargetUrl = normalizeThreadUrl(targetThreadUrl);
+
+  return (
+    normalizedThreadUrl === normalizedTargetUrl ||
+    normalizedThreadUrl.startsWith(`${normalizedTargetUrl}/`)
+  );
 }
 
 async function syncSytheEmailsOnce(client) {
@@ -141,6 +147,7 @@ async function syncSytheEmailsOnce(client) {
 
   const accessToken = await fetchGmailAccessToken();
   const unreadMessages = await fetchUnreadSytheMessages(accessToken, userEmail);
+  console.log(`[sythe-email-sync] found ${unreadMessages.length} unread Sythe message(s).`);
 
   for (const item of unreadMessages) {
     try {
@@ -151,18 +158,24 @@ async function syncSytheEmailsOnce(client) {
       const parsedMessage = parseSytheEmailMessage(message);
 
       if (!parsedMessage.threadUrl || !isTargetThread(parsedMessage.threadUrl)) {
-        await markMessageAsRead(accessToken, userEmail, item.id);
+        console.warn(
+          `[sythe-email-sync] kept unread: thread URL did not match. ` +
+            `subject=${JSON.stringify(parsedMessage.subject)} url=${JSON.stringify(parsedMessage.threadUrl)}`,
+        );
         continue;
       }
 
       if (!parsedMessage.authorName || !parsedMessage.vouchText) {
-        console.warn('[sythe-email-sync] skipped message because parser could not find enough data.');
-        await markMessageAsRead(accessToken, userEmail, item.id);
+        console.warn(
+          `[sythe-email-sync] kept unread: parser could not find enough data. ` +
+            `subject=${JSON.stringify(parsedMessage.subject)} author=${JSON.stringify(parsedMessage.authorName)}`,
+        );
         continue;
       }
 
       await sendSytheVouchMessage({ client, parsedMessage });
       await markMessageAsRead(accessToken, userEmail, item.id);
+      console.log(`[sythe-email-sync] sent vouch from ${parsedMessage.authorName}.`);
     } catch (error) {
       console.error('[sythe-email-sync] message processing error:', error);
     }
