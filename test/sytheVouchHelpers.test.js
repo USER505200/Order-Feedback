@@ -112,3 +112,65 @@ test('parseSytheEmailMessage extracts author without recipient prefix', () => {
   assert.equal(parsed.authorName, 'Apollo');
   assert.equal(parsed.vouchText, 'Fast and safe service.');
 });
+
+test('parseSytheEmailMessage extracts only the posted message from plain text template', () => {
+  const plainText = `
+Ghost ss,
+Pazzo replied to a thread you are watching at Sell & Trade Game Items.
+Grindora Vouches | OSRS Services | Trusted & Fast
+This is the message they posted:
+--------------------------------
+--
+ty they doing great services they are fast tbh i give them my vouch
+--------------------------------
+--
+To view this thread, click here:
+You will not receive any further emails about this thread until you have read the new messages.
+To disable emails from this thread:
+To unsubscribe click: <http://email.sythe.org/unsubscribe>
+  `;
+
+  const message = {
+    payload: {
+      headers: [
+        {
+          name: 'Subject',
+          value: 'Grindora Vouches | OSRS Services | Trusted & Fast - New reply to watched thread',
+        },
+      ],
+      parts: [
+        {
+          mimeType: 'text/plain',
+          body: {
+            data: Buffer.from(plainText, 'utf8')
+              .toString('base64')
+              .replace(/\+/g, '-')
+              .replace(/\//g, '_')
+              .replace(/=+$/g, ''),
+          },
+        },
+        {
+          mimeType: 'text/html',
+          body: {
+            data: Buffer.from(
+              '<a href="https://www.sythe.org/threads/grindora-vouches-osrs-services-trusted-fast/unread">View This Thread</a>',
+              'utf8',
+            )
+              .toString('base64')
+              .replace(/\+/g, '-')
+              .replace(/\//g, '_')
+              .replace(/=+$/g, ''),
+          },
+        },
+      ],
+    },
+  };
+
+  const parsed = parseSytheEmailMessage(message);
+
+  assert.equal(parsed.authorName, 'Pazzo');
+  assert.equal(
+    parsed.vouchText,
+    'ty they doing great services they are fast tbh i give them my vouch',
+  );
+});

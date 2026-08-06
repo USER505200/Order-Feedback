@@ -169,6 +169,13 @@ function removeBoilerplateLines(lines, threadTitle) {
     if (/^sell & trade game items/i.test(line)) return false;
     if (/thread you are watching|quoted your post/i.test(line)) return false;
     if (/^view this thread$/i.test(line)) return false;
+    if (/^this is the message they posted:?$/i.test(line)) return false;
+    if (/^to view this thread\b/i.test(line)) return false;
+    if (/^you will not receive any further emails/i.test(line)) return false;
+    if (/^to disable emails from this thread/i.test(line)) return false;
+    if (/^to disable all emails/i.test(line)) return false;
+    if (/^to unsubscribe click/i.test(line)) return false;
+    if (/^[-_=]{2,}$/i.test(line)) return false;
     if (/^unread watched threads$/i.test(line)) return false;
     if (/^please do not reply to this email/i.test(line)) return false;
     if (/^this message was sent to you because/i.test(line)) return false;
@@ -179,6 +186,26 @@ function removeBoilerplateLines(lines, threadTitle) {
 }
 
 function extractVouchText(lines, threadTitle) {
+  const messageMarkerIndex = lines.findIndex((line) =>
+    /^this is the message they posted:?$/i.test(line),
+  );
+
+  if (messageMarkerIndex !== -1) {
+    const messageLines = lines.slice(messageMarkerIndex + 1);
+    const messageEndIndex = messageLines.findIndex((line) =>
+      /^to view this thread\b|^you will not receive any further emails|^to disable emails/i.test(line),
+    );
+    const extractedLines = (messageEndIndex === -1
+      ? messageLines
+      : messageLines.slice(0, messageEndIndex)
+    ).filter((line) => !/^[-_=]{2,}$/.test(line));
+    const extractedMessage = normalizeWhitespace(extractedLines.join('\n'));
+
+    if (extractedMessage) {
+      return extractedMessage;
+    }
+  }
+
   const cleanedLines = removeBoilerplateLines(lines, threadTitle);
   if (!cleanedLines.length) {
     return '';
@@ -227,18 +254,10 @@ function buildSytheVouchEmbed({
     )
     .setTimestamp(sentAt ? new Date(sentAt) : new Date());
 
-  if (avatarUrl) {
-    embed.setAuthor({
-      name: `${authorName || 'Unknown'} left a vouch`,
-      iconURL: avatarUrl,
-      url: threadUrl || undefined,
-    });
-  } else {
-    embed.setAuthor({
-      name: `${authorName || 'Unknown'} left a vouch`,
-      url: threadUrl || undefined,
-    });
-  }
+  embed.setAuthor({
+    name: `${authorName || 'Unknown'} left a vouch`,
+    url: threadUrl || undefined,
+  });
 
   if (threadTitle) {
     embed.setFooter({ text: threadTitle });
