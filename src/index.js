@@ -11,6 +11,7 @@ const {
   TextInputBuilder,
   TextInputStyle,
 } = require('discord.js');
+require('./brandEmbeds'); // Grindora banner under every embed + dead image links fixed
 
 const completeOrder = require('./commands/completeOrder');
 const { registerCommands } = require('./registerCommands');
