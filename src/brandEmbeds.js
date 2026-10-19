@@ -1,4 +1,4 @@
-// Grindora brand on every embed this bot sends or edits:
+// Grindora brand on every embed this bot sends or edits (and no duplicate messages, see enforceNonce below):
 // - the brand banner under the message's embeds when none of them has an image of its own;
 // - dead image links (Gyazo, expired or unsigned Discord attachment links) replaced: pictures we still
 //   have get their own hosted copy back, other big images get the banner, icons/thumbnails the logo.
@@ -52,6 +52,11 @@ function brandEmbeds(embeds) {
 if (!MessagePayload.prototype.__grindoraBrand) {
   const resolveBody = MessagePayload.prototype.resolveBody;
   MessagePayload.prototype.resolveBody = function brandedResolveBody(...args) {
+    // No duplicate messages: when Discord answers a send after more than 15s, discord.js times out and
+    // sends the same request again, and the first one had gone through (the reply showed up twice).
+    // With a nonce on every message Discord returns the first message instead of creating a second one.
+    const clientOptions = this.target?.client?.options;
+    if (clientOptions && !clientOptions.enforceNonce) clientOptions.enforceNonce = true;
     const result = resolveBody.apply(this, args);
     try {
       brandEmbeds(this.body?.embeds);
