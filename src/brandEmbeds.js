@@ -2,12 +2,13 @@
 // - the brand banner under the message's embeds when none of them has an image of its own;
 // - dead image links (Gyazo, expired or unsigned Discord attachment links) replaced: pictures we still
 //   have get their own hosted copy back, other big images get the banner, icons/thumbnails the logo.
+// - the old logos (brown logo, old server icon, Gyazo logos) always become the red animated logo.
 // It works on the final message body (discord.js MessagePayload), so every send, reply, edit, follow-up
 // and webhook goes through it. BRAND_BANNER_ENABLED=false turns the banner off (dead links are still fixed).
 const { MessagePayload } = require('discord.js');
 
 const BANNER = process.env.BRAND_BANNER_URL || 'https://gdrosrs.com/assets/brand/grindora-banner.gif';
-const LOGO = process.env.BRAND_LOGO_URL || 'https://gdrosrs.com/assets/brand/grindora-logo.gif';
+const LOGO = process.env.BRAND_LOGO_URL || 'https://gdrosrs.com/assets/brand/grindora-logo-red.gif';
 const MENU_BANNER = 'https://gdrosrs.com/assets/brand/grindora-menu-banner.gif';
 
 // Dead links whose picture we still have: they get their own copy back instead of the generic banner/logo.
@@ -18,6 +19,20 @@ const KNOWN = [
   ['8635ffb294608c3771a1b0678fae2b7c', LOGO], // verify logo (Gyazo)
   ['5e40d14f6bf9ee0215d3f336372fbcb5', BANNER], // old banner (Gyazo)
 ];
+
+// Logos we no longer use, even where the link still loads: the red logo replaces them.
+const OLD_LOGOS = [
+  '/assets/brand/grindora-logo.gif', // brown/orange logo
+  '/icons/1487197600456249378/', // old server icon (also through images-ext)
+  'Comp_1.gif',
+  'd42528bebd6b1b64d252fe5c537687f9',
+  '8635ffb294608c3771a1b0678fae2b7c',
+];
+
+function isOldLogo(url) {
+  const value = String(url || '');
+  return OLD_LOGOS.some((key) => value.includes(key));
+}
 
 function replacementFor(url, fallback) {
   const hit = KNOWN.find(([key]) => String(url).includes(key));
@@ -38,9 +53,13 @@ function brandEmbeds(embeds) {
   for (const embed of embeds) {
     if (!embed || typeof embed !== 'object') continue;
     if (embed.image?.url && isDead(embed.image.url)) embed.image = { url: replacementFor(embed.image.url, BANNER) };
-    if (embed.thumbnail?.url && isDead(embed.thumbnail.url)) embed.thumbnail = { url: replacementFor(embed.thumbnail.url, LOGO) };
-    if (embed.author?.icon_url && isDead(embed.author.icon_url)) embed.author.icon_url = replacementFor(embed.author.icon_url, LOGO);
-    if (embed.footer?.icon_url && isDead(embed.footer.icon_url)) embed.footer.icon_url = replacementFor(embed.footer.icon_url, LOGO);
+    if (isOldLogo(embed.thumbnail?.url)) embed.thumbnail = { url: LOGO };
+    else if (embed.thumbnail?.url && isDead(embed.thumbnail.url)) embed.thumbnail = { url: replacementFor(embed.thumbnail.url, LOGO) };
+    for (const part of [embed.author, embed.footer]) {
+      if (!part?.icon_url) continue;
+      if (isOldLogo(part.icon_url)) part.icon_url = LOGO;
+      else if (isDead(part.icon_url)) part.icon_url = replacementFor(part.icon_url, LOGO);
+    }
   }
   if (process.env.BRAND_BANNER_ENABLED !== 'false' && !embeds.some((embed) => embed?.image?.url)) {
     const last = embeds[embeds.length - 1];
@@ -69,4 +88,4 @@ if (!MessagePayload.prototype.__grindoraBrand) {
   MessagePayload.prototype.__grindoraBrand = true;
 }
 
-module.exports = { brandEmbeds, isDead, replacementFor, BANNER, LOGO, MENU_BANNER };
+module.exports = { brandEmbeds, isDead, isOldLogo, replacementFor, BANNER, LOGO, MENU_BANNER };
